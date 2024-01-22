@@ -1,3 +1,4 @@
+events.out.*
 # IDE
 .idea
 .vscode

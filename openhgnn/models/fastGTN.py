@@ -114,9 +114,17 @@ class fastGTN(BaseModel):
                 H.append(th.matmul(h, self.params[n_c]))
             for i in range(self.num_layers):
                 hat_A = self.layers[i](A)
+                        # Save the adjacency matrices after the last GTConv layer
+            if i == self.num_layers - 1:
+                final_adjacency_matrices = hat_A
                 for n_c in range(self.num_channels):
                     edge_weight = self.norm(hat_A[n_c], hat_A[n_c].edata['w_sum'])
                     H[n_c] = self.gcn(hat_A[n_c], H[n_c], edge_weight=edge_weight)
+        # Print the final optimized adjacency matrices
+        print("Final Optimized Adjacency Matrices:")
+        for j, g in enumerate(final_adjacency_matrices):
+            print(f"Relation {j}:")
+            print(g.adjacency_matrix())
             X_ = self.linear1(th.cat(H, dim=1))
             X_ = F.relu(X_)
             y = self.linear2(X_)

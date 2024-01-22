@@ -59,6 +59,7 @@ ohgbn_datasets = ['ohgbn-Freebase', 'ohgbn-yelp2', 'ohgbn-acm', 'ohgbn-imdb']
 hypergraph_datasets = ['GPS', 'drug', 'MovieLens', 'wordnet', 'aminer4AEHCL']
 
 def build_dataset(dataset, task, *args, **kwargs):
+
     if isinstance(dataset, DGLDataset):
         return dataset
 

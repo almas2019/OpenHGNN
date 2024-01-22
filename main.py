@@ -22,3 +22,4 @@ if __name__ == '__main__':
                             use_best_config=args.use_best_config, load_from_pretrained=args.load_from_pretrained)
 
     experiment.run()
+    print(experiment) # added this line
