@@ -1,4 +1,6 @@
 events.out.*
+slurm-*
+data/
 # IDE
 .idea
 .vscode
