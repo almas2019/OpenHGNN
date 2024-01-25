@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:1        # Request GPU "generic resources"
 #SBATCH --cpus-per-task=6  # Cores proportional to GPUs: 6 on Cedar, 16 on Graham.
 #SBATCH --mem=31500M        # Memory proportional to GPUs: 31500 Cedar, 63500 Graham.
-#SBATCH -J read_pt_file
+#SBATCH -J load_model_fastgtn
 #SBATCH -N 1
 # ---------------------------------------------------------------------
 echo "Current working directory: $(pwd)"
@@ -21,6 +21,6 @@ source /project/def-gregorys/almas/spgraph_env/bin/activate
 nvidia-smi
 
 
-cd /home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/scripts
-python read_in_pt_file.py
+cd /home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/
+python load_model.py -m fastGTN -t node_classification -d imdb4GTN -g 0 -c /home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/fastGTN_imdb4GTN_node_classification.pt
 

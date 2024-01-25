@@ -98,6 +98,21 @@ class Experiment(object):
         for key, value in kwargs.items():
             assert key not in self.immutable_params
             self.config.__setattr__(key, value)
+    def load_model(self, checkpoint_path): # I added this part -AK
+        r"""Load the model from a checkpoint file.
+
+        Parameters
+        ----------
+        checkpoint_path : str
+            Path to the checkpoint file.
+        """
+        if os.path.exists(checkpoint_path):
+            checkpoint = torch.load(checkpoint_path)
+            self.model.load_state_dict(checkpoint)
+            print("Model loaded successfully from checkpoint.")
+        else:
+            print(f"No checkpoint file found at {checkpoint_path}.")
+
 
     def run(self):
         """ run the experiment """
@@ -144,3 +159,4 @@ class Experiment(object):
             if '__' not in attr and attr not in self.immutable_params:
                 params_info += '{}: {}\n'.format(attr, getattr(self.config, attr))
         return basic_info + params_info
+
