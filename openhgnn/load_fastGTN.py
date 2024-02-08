@@ -1,5 +1,5 @@
 import torch
-
+from openhgnn.models import fastGTN
 # Load the file
 PATH="/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/fastGTN_imdb4GTN_node_classification.pt"
 
@@ -19,7 +19,7 @@ config_imdb = {
 model = fastGTN(**config_imdb)
 
 # Load the pretrained model weights from the .pt file
-model_state_dict = torch.load("your_model_file.pt")
+model_state_dict = torch.load(PATH)
 model.load_state_dict(model_state_dict['model_state_dict'])
 
 # Set the model to evaluation mode

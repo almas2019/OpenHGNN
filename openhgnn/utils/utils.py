@@ -255,52 +255,37 @@ def ccorr(a, b):
     return irfft(com_mult(conj(rfft(a, 1)), rfft(b, 1)), 1, signal_sizes=(a.shape[-1],))
 
 
+import dgl
+import torch as th
+
 def transform_relation_graph_list(hg, category, identity=True):
-    r"""
-        extract subgraph :math:`G_i` from :math:`G` in which
-        only edges whose type :math:`R_i` belongs to :math:`\mathcal{R}`
-
-        Parameters
-        ----------
-            hg : dgl.heterograph
-                Input heterogeneous graph
-            category : string
-                Type of predicted nodes.
-            identity : bool
-                If True, the identity matrix will be added to relation matrix set.
-    """
-
-    # get target category id
     for i, ntype in enumerate(hg.ntypes):
         if ntype == category:
             category_id = i
     g = dgl.to_homogeneous(hg, ndata='h')
-    # find out the target node ids in g
     loc = (g.ndata[dgl.NTYPE] == category_id).to('cpu')
     category_idx = th.arange(g.num_nodes())[loc]
 
     edges = g.edges()
     etype = g.edata[dgl.ETYPE]
     ctx = g.device
-    # g.edata['w'] = th.ones(g.num_edges(), device=ctx)
     num_edge_type = th.max(etype).item()
 
-    # norm = EdgeWeightNorm(norm='right')
-    # edata = norm(g.add_self_loop(), th.ones(g.num_edges() + g.num_nodes(), device=ctx))
     graph_list = []
+    edge_type_list = []  # List to store edge types
     for i in range(num_edge_type + 1):
         e_ids = th.nonzero(etype == i).squeeze(-1)
+        edge_type_list.append(i)  # Add edge type to the list
         sg = dgl.graph((edges[0][e_ids], edges[1][e_ids]), num_nodes=g.num_nodes())
-        # sg.edata['w'] = edata[e_ids]
-        sg.edata['w'] = th.ones(sg.num_edges(), device=ctx)
+        sg.edata['w'] = th.ones(sg.num_edges(), device=ctx)  # Initialize weights as ones
         graph_list.append(sg)
     if identity == True:
         x = th.arange(0, g.num_nodes(), device=ctx)
         sg = dgl.graph((x, x))
-        # sg.edata['w'] = edata[g.num_edges():]
-        sg.edata['w'] = th.ones(g.num_nodes(), device=ctx)
+        sg.edata['w'] = th.ones(g.num_nodes(), device=ctx)  # Initialize weights as ones
         graph_list.append(sg)
-    return graph_list, g.ndata['h'], category_idx
+
+    return graph_list, g.ndata['h'], category_idx, edge_type_list
 
 
 def extract_mtx_with_id_edge(g):

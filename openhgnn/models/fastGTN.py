@@ -67,6 +67,7 @@ class fastGTN(BaseModel):
         self.identity = identity
 
         layers = []
+        
         for i in range(num_layers):
             layers.append(GTConv(num_edge_type, num_channels))
         self.params = nn.ParameterList()
@@ -95,90 +96,35 @@ class fastGTN(BaseModel):
             g.edata['w_sum'] = self.norm(g, g.edata['w_sum'])
             norm_H.append(g)
         return norm_H
-    
-    def generate_metapath_info(self, hg, node_types, edge_types, path, path_index, Filter):
-        # Assuming path is a tensor with node and edge indices
-        # Convert tensor indices to Python integers
-        node_type_indices = path[0::2].long().cpu().numpy()
-        edge_type_indices = path[1::2].long().cpu().numpy()
-
-        # Convert indices to node and edge types
-        node_type_names = [node_types[int(idx)] for idx in node_type_indices]
-        edge_type_names = [edge_types[int(idx)] for idx in edge_type_indices]
-
-        # Construct metapath name
-        metapath_name = "-".join([f"{src}-{edge}-{dst}" for src, edge, dst in zip(node_type_names, edge_type_names, node_type_names[1:])])
-
-        # Extract weight from Filter parameter
-        weight = Filter[path_index, 0].item()  # Assuming a single value for simplicity
-
-        return metapath_name, weight
-
 
     def forward(self, hg, h):
         with hg.local_scope():
             hg.ndata['h'] = h
-
-            # Extract node and edge types
-            node_types = hg.ntypes
-            edge_types = hg.etypes
-
-            # * =============== Extract edges in the original graph ================
+            # * =============== Extract edges in original graph ================
             if self.category_idx is None:
-                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,
-                                                                             identity=self.identity)
+                self.A, h, self.category_idx, edge_type_list = trgl(hg, category=self.category, identity=self.identity)
+                self.num_edge_type = len(edge_type_list)  # Update num_edge_type based on the imported function
             else:
                 g = dgl.to_homogeneous(hg, ndata='h')
                 h = g.ndata['h']
-
+            # X_ = self.gcn(g, self.h)
             A = self.A
-            H = []  # List to store metapaths
-
-            # Track metapaths and their weights
-            metapaths_info = []
-
+            # * =============== Get new graph structure ================
+            H = []
+            edge_weights = []  # Store the edge type weights
             for n_c in range(self.num_channels):
                 H.append(th.matmul(h, self.params[n_c]))
-
             for i in range(self.num_layers):
                 hat_A = self.layers[i](A)
-
+                print("HAT_A is:")
+                print(hat_A)
                 for n_c in range(self.num_channels):
                     edge_weight = self.norm(hat_A[n_c], hat_A[n_c].edata['w_sum'])
                     H[n_c] = self.gcn(hat_A[n_c], H[n_c], edge_weight=edge_weight)
-
-                # Store metapath information
-                metapaths_info.append({"layer": i + 1, "metapaths": H.copy()})
-
             X_ = self.linear1(th.cat(H, dim=1))
             X_ = F.relu(X_)
-            y = self.linear2(X_)
-
-            # Print metapath information with generated textual representation and weight
-            for info in metapaths_info:
-                Filter = self.layers[0].weight
-            for j, path in enumerate(info["metapaths"]):
-                # Assuming path is a tensor with node and edge indices
-                node_type_indices = path[0::2].long().cpu().numpy()
-                edge_type_indices = path[1::2].long().cpu().numpy()
-                print(f"Node Type Indices: {node_type_indices}")
-                print(f"Edge Type Indices: {edge_type_indices}")
-
-          # Convert indices to node and edge types
-                node_type_names = [node_types[int(idx)] for row in node_type_indices for idx in row]
-                edge_type_names = [edge_types[int(idx)] for row in edge_type_indices for idx in row]
-
-                # Construct metapath name
-                metapath_name = "-".join([f"{src}-{edge}-{dst}" for src, edge, dst in zip(node_type_names, edge_type_names, node_type_names[1:])])
-
-                # Extract weight from Filter parameter
-                weight = Filter[j, 0].item()  # Assuming a single value for simplicity
-
-                print(f"{metapath_name}, Weight: {weight}")
+            y = self.linear2(X_)         
             return {self.category: y[self.category_idx]}
-
-
-
 
 
 class GCNConv(nn.Module):
@@ -229,8 +175,16 @@ class GTConv(nn.Module):
         for i in range(num_channels):
             for j, g in enumerate(A):
                 A[j].edata['w_sum'] = g.edata['w'] * Filter[i][j]
+                print(i)
+                print(j)
+                print("Size of A is:")
+                print(A)
+                A[j].edata['edge_type'] = th.full((g.num_edges(),), self.edge_type_list[i], dtype=th.long)
             sum_g = dgl.adj_sum_graph(A, 'w_sum')
+            sum_g.edata['edge_type'] = th.cat([g.edata['edge_type'] for g in A], dim=0)
             results.append(sum_g)
+        print("Filter is:")
         print(Filter)
-        print(results)
+        print(Filter.size())
         return results
+        
