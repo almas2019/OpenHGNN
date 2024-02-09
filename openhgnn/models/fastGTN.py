@@ -101,24 +101,24 @@ class fastGTN(BaseModel):
             hg.ndata['h'] = h
             # * =============== Extract edges in original graph ================
             if self.category_idx is None:
-                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,
-                                                                             identity=self.identity)
+                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,identity=self.identity)
+                                # Get the edge type indices
+                edge_type_indices = {rel: i for i, rel in enumerate(hg.etypes)}                                                          
             else:
                 g = dgl.to_homogeneous(hg, ndata='h')
                 h = g.ndata['h']
+                edge_type_indices = {rel: i for i, rel in enumerate(g.etypes)}
+
             # X_ = self.gcn(g, self.h)
             A = self.A
             # * =============== Get new graph structure ================
             H = []
-            edge_weights = []  # Store the edge type weights
+            meta_path_lengths = []  # List to store meta-path lengths at each layer
             for n_c in range(self.num_channels):
                 H.append(th.matmul(h, self.params[n_c]))
             for i in range(self.num_layers):
                 hat_A, filters = self.layers[i](A)  # Get A_hat and filters from GTConv layer
-                print("Generated Meta-paths:")
-                for idx, meta_path_graph in enumerate(hat_A):
-                    print(f"Meta-path {idx}:")
-                    print(meta_path_graph)
+                layer_meta_path_lengths = []  # List to store meta-path lengths at current layer
                 print("Learned Weights:")
                 for idx, filter in enumerate(filters):
                     print(f"Filter {idx}:")
@@ -126,9 +126,16 @@ class fastGTN(BaseModel):
                 for n_c in range(self.num_channels):
                     edge_weight = self.norm(hat_A[n_c], hat_A[n_c].edata['w_sum'])
                     H[n_c] = self.gcn(hat_A[n_c], H[n_c], edge_weight=edge_weight)
+                    meta_path_length = sum(A[j].number_of_edges() for j in range(len(A)))
+                    layer_meta_path_lengths.append(meta_path_length)
+                meta_path_lengths.append(layer_meta_path_lengths)
             X_ = self.linear1(th.cat(H, dim=1))
             X_ = F.relu(X_)
-            y = self.linear2(X_)         
+            y = self.linear2(X_)
+            print("Edge Type Mapping:")
+            print(edge_type_indices)
+            print("Meta-path Lengths:")
+            print(meta_path_lengths)         
             return {self.category: y[self.category_idx]}
 
 
