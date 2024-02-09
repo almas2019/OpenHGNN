@@ -6,7 +6,7 @@ from dgl.nn.pytorch import GraphConv, EdgeWeightNorm
 from ..utils import transform_relation_graph_list
 from . import BaseModel, register_model
 import dgl.function as fn
-
+import pickle
 @register_model('fastGTN')
 class fastGTN(BaseModel):
     r"""
@@ -67,7 +67,6 @@ class fastGTN(BaseModel):
         self.identity = identity
 
         layers = []
-        
         for i in range(num_layers):
             layers.append(GTConv(num_edge_type, num_channels))
         self.params = nn.ParameterList()
@@ -102,8 +101,8 @@ class fastGTN(BaseModel):
             hg.ndata['h'] = h
             # * =============== Extract edges in original graph ================
             if self.category_idx is None:
-                self.A, h, self.category_idx, edge_type_list = trgl(hg, category=self.category, identity=self.identity)
-                self.num_edge_type = len(edge_type_list)  # Update num_edge_type based on the imported function
+                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,
+                                                                             identity=self.identity)
             else:
                 g = dgl.to_homogeneous(hg, ndata='h')
                 h = g.ndata['h']
@@ -115,9 +114,15 @@ class fastGTN(BaseModel):
             for n_c in range(self.num_channels):
                 H.append(th.matmul(h, self.params[n_c]))
             for i in range(self.num_layers):
-                hat_A = self.layers[i](A)
-                print("HAT_A is:")
-                print(hat_A)
+                hat_A, filters = self.layers[i](A)  # Get A_hat and filters from GTConv layer
+                print("Generated Meta-paths:")
+                for idx, meta_path_graph in enumerate(hat_A):
+                    print(f"Meta-path {idx}:")
+                    print(meta_path_graph)
+                print("Learned Weights:")
+                for idx, filter in enumerate(filters):
+                    print(f"Filter {idx}:")
+                    print(filter)
                 for n_c in range(self.num_channels):
                     edge_weight = self.norm(hat_A[n_c], hat_A[n_c].edata['w_sum'])
                     H[n_c] = self.gcn(hat_A[n_c], H[n_c], edge_weight=edge_weight)
@@ -172,19 +177,26 @@ class GTConv(nn.Module):
             Filter = self.weight
         num_channels = Filter.shape[0]
         results = []
+        # Clear filters for each forward pass
+        self.filters = []
         for i in range(num_channels):
             for j, g in enumerate(A):
                 A[j].edata['w_sum'] = g.edata['w'] * Filter[i][j]
-                print(i)
-                print(j)
-                print("Size of A is:")
-                print(A)
-                A[j].edata['edge_type'] = th.full((g.num_edges(),), self.edge_type_list[i], dtype=th.long)
             sum_g = dgl.adj_sum_graph(A, 'w_sum')
-            sum_g.edata['edge_type'] = th.cat([g.edata['edge_type'] for g in A], dim=0)
             results.append(sum_g)
+            # Append filter to the list
+            self.filters.append(Filter[i])
         print("Filter is:")
         print(Filter)
         print(Filter.size())
-        return results
+       # Save filters to disk
+        self.save_filters_to_disk()
         
+        return results,self.filters
+    
+    def save_filters_to_disk(self):
+        # Specify the file path to save the filters
+        file_path = "/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters.pt"
+        # Save the filters to disk
+        th.save(self.filters, file_path)
+        print("Filters saved to:", file_path)
