@@ -17,7 +17,7 @@ class NodeClassification(BaseFlow):
     Note: If the output dim is not equal the number of classes, we will modify the output dim with the number of classes.
     """
 
-    def __init__(self, args):
+    def __init__(self, args, early_stopping=True):  # Add early_stopping parameter
         """
 
         Attributes
@@ -29,11 +29,13 @@ class NodeClassification(BaseFlow):
 
         """
 
-        super(NodeClassification, self).__init__(args)
+        super(NodeClassification, self).__init__(args,early_stopping=early_stopping)
         self.args.category = self.task.dataset.category
         self.category = self.args.category
 
         self.num_classes = self.task.dataset.num_classes
+        self.early_stopping = early_stopping
+
 
         if not hasattr(self.task.dataset, 'out_dim') or args.out_dim != self.num_classes:
             self.logger.info('[NC Specific] Modify the out_dim with num_classes')
@@ -181,10 +183,13 @@ class NodeClassification(BaseFlow):
                 self.writer.add_scalars('loss', {'train': train_loss, 'valid': val_loss}, global_step=epoch)
                 for mode in modes:
                     self.writer.add_scalars(f'metric_{mode}', metric_dict[mode], global_step=epoch)
-                early_stop = stopper.loss_step(val_loss, self.model)
-                if early_stop:
-                    self.logger.train_info('Early Stop!\tEpoch:' + str(epoch))
-                    break
+                if self.early_stopping: # added early stop flag
+                    early_stop = stopper.loss_step(val_loss, self.model)
+                    if early_stop:
+                        self.logger.train_info('Early Stop!\tEpoch:' + str(epoch))
+                        break
+        if self.early_stopping:
+            stopper.load_model(self.model)
         stopper.load_model(self.model)
         if self.args.prediction_flag:
             if self.args.mini_batch_flag and hasattr(self, 'val_loader'):

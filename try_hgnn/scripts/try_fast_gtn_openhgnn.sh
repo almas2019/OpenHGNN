@@ -22,6 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/OpenHGNN
-python main.py -m fastGTN -t node_classification -d imdb4GTN -g 0 --use_best_config
+python main.py -m fastGTN -t node_classification -d imdb4GTN -g 0 --use_best_config --early_stopping False
 tensorboard --logdir=./openhgnn/output/fastGTN/
 

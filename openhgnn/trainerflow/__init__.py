@@ -40,10 +40,10 @@ def try_import_flow(flow):
     return True
 
 
-def build_flow(args, flow_name):
+def build_flow(config, flow_name, **kwargs):
     if not try_import_flow(flow_name):
         exit(1)
-    return FLOW_REGISTRY[flow_name](args)
+    return FLOW_REGISTRY[flow_name](config, **kwargs)
 
 
 SUPPORTED_FLOWS = {

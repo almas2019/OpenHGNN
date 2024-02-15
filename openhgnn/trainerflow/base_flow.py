@@ -14,7 +14,7 @@ class BaseFlow(ABC):
         'Adadelta': torch.optim.Adadelta
     }
 
-    def __init__(self, args):
+    def __init__(self, args,early_stopping=True):
         """
 
         Parameters

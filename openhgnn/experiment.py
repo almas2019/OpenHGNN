@@ -66,14 +66,15 @@ class Experiment(object):
     immutable_params = ['model', 'dataset', 'task']
 
     def __init__(self, model, dataset, task,
-                 gpu: int = -1,
-                 use_best_config: bool = False,
-                 load_from_pretrained: bool = False,
-                 hpo_search_space=None,
-                 hpo_trials: int = 100,
-                 output_dir: str = "./openhgnn/output",
-                 conf_path: str = default_conf_path,
-                 **kwargs):
+             gpu: int = -1,
+             use_best_config: bool = False,
+             load_from_pretrained: bool = False,
+             hpo_search_space=None,
+             hpo_trials: int = 100,
+             output_dir: str = "./openhgnn/output",
+             conf_path: str = default_conf_path,
+             early_stopping: bool = True,  # Add the early stopping flag here
+             **kwargs):
         self.config = Config(file_path=conf_path, model=model, dataset=dataset, task=task, gpu=gpu)
         self.config.model = model
         self.config.dataset = dataset
@@ -86,6 +87,7 @@ class Experiment(object):
         # self.config.seed = seed
         self.config.hpo_search_space = hpo_search_space
         self.config.hpo_trials = hpo_trials
+        self.config.early_stopping = early_stopping  # Save the early stopping flag in the config
 
         if not getattr(self.config, 'seed', False):
             self.config.seed = 0
@@ -138,7 +140,7 @@ class Experiment(object):
             # hyper-parameter search
             hpo_experiment(self.config, trainerflow)
         else:
-            flow = build_flow(self.config, trainerflow)
+            flow = build_flow(self.config, trainerflow, early_stopping=self.config.early_stopping) # edited this
             result = flow.train()
             if hasattr(self.config, 'line_profiler_func'):
                 prof.print_stats()
