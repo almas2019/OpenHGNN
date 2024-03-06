@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.16.3"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-bc7051bd3345464b29738d7a9a982094"}, "mark": {"type": "rect"}, "encoding": {"color": {"field": "Value", "type": "quantitative"}, "x": {"field": "Layer", "type": "ordinal"}, "y": {"field": "Label", "type": "ordinal"}}, "height": 150, "title": "Heatmap of Filters", "width": 200, "$schema": "https://vega.github.io/schema/vega-lite/v5.16.3.json", "datasets": {"data-bc7051bd3345464b29738d7a9a982094": [{"Layer": 0, "Label": "MD", "Value": 0.20102807879447937}, {"Layer": 0, "Label": "DM", "Value": 0.20153455436229706}, {"Layer": 0, "Label": "MA", "Value": 0.19855660200119019}, {"Layer": 0, "Label": "AM", "Value": 0.19684819877147675}, {"Layer": 0, "Label": "I", "Value": 0.20203255116939545}, {"Layer": 1, "Label": "MD", "Value": 0.19580142199993134}, {"Layer": 1, "Label": "DM", "Value": 0.20306065678596497}, {"Layer": 1, "Label": "MA", "Value": 0.2000809758901596}, {"Layer": 1, "Label": "AM", "Value": 0.19978375732898712}, {"Layer": 1, "Label": "I", "Value": 0.20127321779727936}, {"Layer": 2, "Label": "MD", "Value": 0.19544540345668793}, {"Layer": 2, "Label": "DM", "Value": 0.19988617300987244}, {"Layer": 2, "Label": "MA", "Value": 0.20073677599430084}, {"Layer": 2, "Label": "AM", "Value": 0.19916018843650818}, {"Layer": 2, "Label": "I", "Value": 0.204771488904953}, {"Layer": 3, "Label": "MD", "Value": 0.19869567453861237}, {"Layer": 3, "Label": "DM", "Value": 0.20268863439559937}, {"Layer": 3, "Label": "MA", "Value": 0.1986619085073471}, {"Layer": 3, "Label": "AM", "Value": 0.19878529012203217}, {"Layer": 3, "Label": "I", "Value": 0.20116840302944183}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>

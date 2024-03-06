@@ -7,39 +7,42 @@ from ..utils import transform_relation_graph_list
 from . import BaseModel, register_model
 import dgl.function as fn
 import pickle
+
 @register_model('fastGTN')
 class fastGTN(BaseModel):
     r"""
-        fastGTN from paper `Graph Transformer Networks: Learning Meta-path Graphs to Improve GNNs
-        <https://arxiv.org/abs/2106.06218>`__.
-        It is the extension paper  of GTN.
-        `Code from author <https://github.com/seongjunyun/Graph_Transformer_Networks>`__.
+    fastGTN from paper `Graph Transformer Networks: Learning Meta-path Graphs to Improve GNNs
+    <https://arxiv.org/abs/2106.06218>`__.
+    It is the extension paper of GTN.
+    `Code from author <https://github.com/seongjunyun/Graph_Transformer_Networks>`__.
 
-        Given a heterogeneous graph :math:`G` and its edge relation type set :math:`\mathcal{R}`.Then we extract
-        the single relation adjacency matrix list. In that, we can generate combination adjacency matrix by conv
-        the single relation adjacency matrix list. We can generate :math:'l-length' meta-path adjacency matrix
-        by multiplying combination adjacency matrix. Then we can generate node representation using a GCN layer.
+    Given a heterogeneous graph :math:`G` and its edge relation type set :math:`\mathcal{R}`.
+    Then we extract the single relation adjacency matrix list.
+    In that, we can generate combination adjacency matrix by conv
+    the single relation adjacency matrix list.
+    We can generate :math:'l-length' meta-path adjacency matrix by multiplying combination adjacency matrix.
+    Then we can generate node representation using a GCN layer.
 
-        Parameters
-        ----------
-        num_edge_type : int
-            Number of relations.
-        num_channels : int
-            Number of conv channels.
-        in_dim : int
-            The dimension of input feature.
-        hidden_dim : int
-            The dimension of hidden layer.
-        num_class : int
-            Number of classification type.
-        num_layers : int
-            Length of hybrid metapath.
-        category : string
-            Type of predicted nodes.
-        norm : bool
-            If True, the adjacency matrix will be normalized.
-        identity : bool
-            If True, the identity matrix will be added to relation matrix set.
+    Parameters
+    ----------
+    num_edge_type : int
+        Number of relations.
+    num_channels : int
+        Number of conv channels.
+    in_dim : int
+        The dimension of input feature.
+    hidden_dim : int
+        The dimension of hidden layer.
+    num_class : int
+        Number of classification type.
+    num_layers : int
+        Length of hybrid metapath.
+    category : string
+        Type of predicted nodes.
+    norm : bool
+        If True, the adjacency matrix will be normalized.
+    identity : bool
+        If True, the identity matrix will be added to relation matrix set.
 
     """
     @classmethod
@@ -101,9 +104,10 @@ class fastGTN(BaseModel):
             hg.ndata['h'] = h
             # * =============== Extract edges in original graph ================
             if self.category_idx is None:
-                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,identity=self.identity)
-                                # Get the edge type indices
-                edge_type_indices = {rel: i for i, rel in enumerate(hg.etypes)}                                                          
+                self.A, h, self.category_idx = transform_relation_graph_list(hg, category=self.category,
+                                                                             identity=self.identity)
+                # Get the edge type indices
+                edge_type_indices = {rel: i for i, rel in enumerate(hg.etypes)}
             else:
                 g = dgl.to_homogeneous(hg, ndata='h')
                 h = g.ndata['h']
@@ -113,30 +117,40 @@ class fastGTN(BaseModel):
             A = self.A
             # * =============== Get new graph structure ================
             H = []
-            meta_path_lengths = []  # List to store meta-path lengths at each layer
+            all_filters = []  # List to store filters for each layer
             for n_c in range(self.num_channels):
                 H.append(th.matmul(h, self.params[n_c]))
             for i in range(self.num_layers):
                 hat_A, filters = self.layers[i](A)  # Get A_hat and filters from GTConv layer
-                layer_meta_path_lengths = []  # List to store meta-path lengths at current layer
-                print("Learned Weights:")
-                for idx, filter in enumerate(filters):
-                    print(f"Filter {idx}:")
-                    print(filter)
                 for n_c in range(self.num_channels):
                     edge_weight = self.norm(hat_A[n_c], hat_A[n_c].edata['w_sum'])
                     H[n_c] = self.gcn(hat_A[n_c], H[n_c], edge_weight=edge_weight)
-                    meta_path_length = sum(A[j].number_of_edges() for j in range(len(A)))
-                    layer_meta_path_lengths.append(meta_path_length)
-                meta_path_lengths.append(layer_meta_path_lengths)
+                all_filters.append(filters)  # Append filters for the current layer
             X_ = self.linear1(th.cat(H, dim=1))
             X_ = F.relu(X_)
             y = self.linear2(X_)
             print("Edge Type Mapping:")
             print(edge_type_indices)
-            print("Meta-path Lengths:")
-            print(meta_path_lengths)         
+            # Save and print filters for each layer
+            for layer_idx, filters in enumerate(all_filters):
+                self.save_filters_to_disk(filters, layer_idx)
+                self.print_filters(filters, layer_idx)
             return {self.category: y[self.category_idx]}
+
+    def save_filters_to_disk(self, filters, layer_idx):
+        # Specify the file path to save the filters
+        file_path = "/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters_layer_" + str(layer_idx)
+        for filter_idx, filter_tensor in enumerate(filters):
+            # Save the filters to disk
+            th.save(filter_tensor, file_path + f"_filter_{filter_idx}.pt")  # constructs file name dynamically using f
+            print("Filter", filter_idx, "saved to:", file_path)
+
+    def print_filters(self, filters, layer_idx):
+        print("Layer:", self.layers[layer_idx].__class__.__name__)
+        for filter_idx, filter_tensor in enumerate(filters):
+            print("Filter", filter_idx, "is:")
+            print(filter_tensor)
+            print("Filter size:", filter_tensor.size())
 
 
 class GCNConv(nn.Module):
@@ -158,12 +172,12 @@ class GCNConv(nn.Module):
 
 class GTConv(nn.Module):
     r"""
-        We conv each sub adjacency matrix :math:`A_{R_{i}}` to a combination adjacency matrix :math:`A_{1}`:
+    We conv each sub adjacency matrix :math:`A_{R_{i}}` to a combination adjacency matrix :math:`A_{1}`:
 
-        .. math::
-            A_{1} = conv\left(A ; W_{c}\right)=\sum_{R_{i} \in R} w_{R_{i}} A_{R_{i}}
+    .. math::
+        A_{1} = conv\left(A ; W_{c}\right)=\sum_{R_{i} \in R} w_{R_{i}} A_{R_{i}}
 
-        where :math:`R_i \subseteq \mathcal{R}` and :math:`W_{c}` is the weight of each relation matrix
+    where :math:`R_i \subseteq \mathcal{R}` and :math:`W_{c}` is the weight of each relation matrix
     """
 
     def __init__(self, in_channels, out_channels, softmax_flag=True):
@@ -184,26 +198,14 @@ class GTConv(nn.Module):
             Filter = self.weight
         num_channels = Filter.shape[0]
         results = []
-        # Clear filters for each forward pass
-        self.filters = []
+
         for i in range(num_channels):
             for j, g in enumerate(A):
                 A[j].edata['w_sum'] = g.edata['w'] * Filter[i][j]
             sum_g = dgl.adj_sum_graph(A, 'w_sum')
             results.append(sum_g)
-            # Append filter to the list
-            self.filters.append(Filter[i])
-        print("Filter is:")
-        print(Filter)
-        print(Filter.size())
-       # Save filters to disk
-        self.save_filters_to_disk()
-        
-        return results,self.filters
-    
-    def save_filters_to_disk(self):
-        # Specify the file path to save the filters
-        file_path = "/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters.pt"
-        # Save the filters to disk
-        th.save(self.filters, file_path)
-        print("Filters saved to:", file_path)
+
+        return results, Filter
+
+
+
