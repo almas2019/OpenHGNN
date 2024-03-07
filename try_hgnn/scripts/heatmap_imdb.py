@@ -49,3 +49,4 @@ heatmap = alt.Chart(df).mark_rect().encode(
 heatmap.save(output_folder+'heatmap.html')
 
 
+df.to_csv(output_folder+"imdb_layers_avg_channel.csv")
