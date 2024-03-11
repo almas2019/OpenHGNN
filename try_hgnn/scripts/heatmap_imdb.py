@@ -39,7 +39,6 @@ heatmap = alt.Chart(df).mark_rect().encode(
     x='Layer:O',
     y='Label:O',
     color=alt.Color('Value:Q').scale(scheme="blues") , # blues colour scheme 
-    sort=None,
 ).properties(
     title='Heatmap of Filters',
     width=200,

@@ -187,3 +187,4 @@ core.*
 ._.DS_Store
 ._heatmap.html
 openhgnn/dataset/
+openhgnn/output/
