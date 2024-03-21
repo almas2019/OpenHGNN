@@ -76,6 +76,7 @@ class Config(object):
             self.adaptive_lr_flag = conf.getboolean("GTN", "adaptive_lr_flag")
             self.mini_batch_flag = conf.getboolean("GTN", "mini_batch_flag")
 
+
         elif self.model_name == "MHNF":
             self.lr = conf.getfloat("MHNF", "learning_rate")
             self.weight_decay = conf.getfloat("MHNF", "weight_decay")

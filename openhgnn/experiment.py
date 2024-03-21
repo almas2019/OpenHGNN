@@ -3,6 +3,7 @@ from .config import Config
 from .utils import set_random_seed, set_best_config, Logger
 from .trainerflow import build_flow
 from .auto import hpo_experiment
+import torch as th
 
 __all__ = ['Experiment']
 
@@ -83,7 +84,7 @@ class Experiment(object):
         self.config.use_best_config = use_best_config
         # self.config.use_hpo = use_hpo
         self.config.load_from_pretrained = load_from_pretrained
-        self.config.output_dir = os.path.join(output_dir, self.config.model_name)
+        self.config.output_dir = os.path.join(output_dir, self.config.model) # self.config.dataset edited this line so outputs are dataset specific
         # self.config.seed = seed
         self.config.hpo_search_space = hpo_search_space
         self.config.hpo_trials = hpo_trials
@@ -109,12 +110,26 @@ class Experiment(object):
             Path to the checkpoint file.
         """
         if os.path.exists(checkpoint_path):
-            checkpoint = torch.load(checkpoint_path)
+            checkpoint = th.load(checkpoint_path)
+            self.model = model  # Set the model attribute
             self.model.load_state_dict(checkpoint)
             print("Model loaded successfully from checkpoint.")
         else:
             print(f"No checkpoint file found at {checkpoint_path}.")
 
+
+    def save_model(self, model, filepath): # added this AK
+        """
+        Save the model's state dictionary to a file.
+
+        Parameters
+        ----------
+        model : torch.nn.Module
+            The model to be saved.
+        filepath : str
+            The file path where the model will be saved.
+        """
+        th.save(model.state_dict(), filepath)
 
     def run(self):
         """ run the experiment """
@@ -140,8 +155,15 @@ class Experiment(object):
             # hyper-parameter search
             hpo_experiment(self.config, trainerflow)
         else:
-            flow = build_flow(self.config, trainerflow, early_stopping=self.config.early_stopping) # edited this
+            flow = build_flow(self.config, trainerflow, early_stopping=self.config.early_stopping,) # edited this, added early stopping 
             result = flow.train()
+            # Construct the save path and filename
+            save_dir = f'./openhgnn/output/{self.config.model_name}/{self.config.dataset_name}/'
+            os.makedirs(save_dir, exist_ok=True)
+            save_filename = f'{self.config.model_name}_{self.config.dataset_name}.pt'
+            model_save_path = os.path.join(save_dir, save_filename)
+            # Save the model after training
+            self.save_model(flow.model, model_save_path)
             if hasattr(self.config, 'line_profiler_func'):
                 prof.print_stats()
             return result

@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:1        # Request GPU "generic resources"
 #SBATCH --cpus-per-task=6  # Cores proportional to GPUs: 6 on Cedar, 16 on Graham.
 #SBATCH --mem=31500M        # Memory proportional to GPUs: 31500 Cedar, 63500 Graham.
-#SBATCH -J try_fastgtn_openhgnn
+#SBATCH -J _tcell_fib_try_fastgtn_openhgnn
 #SBATCH -N 1
 # ---------------------------------------------------------------------
 echo "Current working directory: $(pwd)"
@@ -22,15 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/OpenHGNN
-python main.py -m fastGTN -t node_classification -d imdb4GTN -g 0 --use_best_config --early_stopping False
+CUDA_LAUNCH_BLOCKING=1 python main.py -m fastGTN -t node_classification -d tcell_fib -g 0 --use_best_config --early_stopping True # will save model if early stopping is true, need to figure out what to do if early stopping is false
 tensorboard --logdir=./openhgnn/output/fastGTN/
-
-# 
-# if [ $? -eq 0 ]; then
-#     echo "Execution completed successfully. Moving files to a folder."
-#     # Move the files to the created directory
-#     mv /home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters_layer*  /home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/imdb4GTN/
-# else
-#     echo "Error occurred during execution."
-# fi
-
+# print out all variables and get their dimensions

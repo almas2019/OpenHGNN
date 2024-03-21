@@ -53,7 +53,7 @@ class NodeClassification(BaseFlow):
         self.labels = self.task.get_labels().to(self.device)
         self.num_nodes_dict = {ntype: self.hg.num_nodes(ntype) for ntype in self.hg.ntypes}
         self.to_homo_flag = getattr(self.model, 'to_homo_flag', False)
-        self.writer = SummaryWriter(f'./openhgnn/output/{self.model_name}/')
+        self.writer = SummaryWriter(f'./openhgnn/output/{self.model_name}/{self.args.dataset_name}/') # added dataset_name to folder output to make it dataset specific
 
         if self.to_homo_flag:
             self.g = dgl.to_homogeneous(self.hg)
@@ -190,7 +190,7 @@ class NodeClassification(BaseFlow):
                         break
         if self.early_stopping:
             stopper.load_model(self.model)
-        stopper.load_model(self.model)
+        #stopper.load_model(self.model) This is probably causing issues with early_stopping=False, 
         if self.args.prediction_flag:
             if self.args.mini_batch_flag and hasattr(self, 'val_loader'):
                 indices, y_predicts = self._mini_prediction_step()

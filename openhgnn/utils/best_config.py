@@ -92,11 +92,12 @@ BEST_CONFIGS = {
         'GTN': {
             'general': {'lr': 0.005, 'weight_decay': 0.001, 'hidden_dim': 128, 'max_epoch': 100, 'patience': 20,
                         'norm_emd_flag': True, 'mini_batch_flag': False},
+
             'acm4GTN': {
                 'num_layers': 2, 'num_channels': 2, 'adaptive_lr_flag': True,
             },
             'imdb4GTN': {
-                'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'num_channels': 8, 'adaptive_lr_flag': True,
+                'lr': 0.01, 'hidden_dim': 64, 'num_layers': 2, 'num_channels': 8, 'adaptive_lr_flag': True,
                 'dropout': 0.1
             },
             'dblp4GTN': {
@@ -112,6 +113,9 @@ BEST_CONFIGS = {
         'fastGTN': {
             'general': {'lr': 0.005, 'weight_decay': 0.001, 'hidden_dim': 64, 'max_epoch': 50, 'patience': 20,
                         'norm_emd_flag': True, 'mini_batch_flag': False},
+            'tcell_fib': {
+                'lr': 0.01,'num_layers': 3, 'num_channels': 2, 'adaptive_lr_flag': False,
+            },
             'acm4GTN': {
                 'lr': 0.01, 'hidden_dim': 32, 'num_layers': 3, 'num_channels': 8, 'adaptive_lr_flag': False,
                 'dropout': 0.01,

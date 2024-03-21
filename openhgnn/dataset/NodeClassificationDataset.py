@@ -191,6 +191,19 @@ class HIN_NodeClassification(NodeClassificationDataset):
             g, _ = load_graphs(data_path)
             g = g[0].long()
             self.in_dim = g.ndata['h'][category].shape[1]
+        elif name_dataset == 'tcell_fib':
+            data_path = '/home/almas/projects/def-gregorys/almas/synthetic_data_gnn/data/crc_data/cytospace_medusa/graph_het_subsampled_tcell_fib.bin'
+            category = 'Tcell'
+            num_classes = 2
+            g, _ = load_graphs(data_path)
+            g = g[0].long()
+            self.in_dim = g.ndata['h'][category].shape[1]
+            self.meta_paths_dict = {
+                'TT': [('Tcells', 'T-T', 'Tcells')],
+                'FT': [('Fibroblast', 'F-T', 'Tcells')],
+                'TF': [('Tcells', 'T-F', 'Fibroblast')],
+                'FF': [('Fibroblast', 'F-F', 'Fibroblast')]
+            }
         elif name_dataset == 'acm4NSHE':
             dataset = AcademicDataset(name='acm4NSHE', raw_dir='')
             category = 'paper'

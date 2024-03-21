@@ -208,4 +208,3 @@ class GTConv(nn.Module):
         return results, Filter
 
 
-
