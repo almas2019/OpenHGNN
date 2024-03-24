@@ -84,7 +84,7 @@ class Experiment(object):
         self.config.use_best_config = use_best_config
         # self.config.use_hpo = use_hpo
         self.config.load_from_pretrained = load_from_pretrained
-        self.config.output_dir = os.path.join(output_dir, self.config.model) # self.config.dataset edited this line so outputs are dataset specific
+        self.config.output_dir = os.path.join(output_dir, model,dataset) # self.config.dataset edited this line so outputs are dataset specific
         # self.config.seed = seed
         self.config.hpo_search_space = hpo_search_space
         self.config.hpo_trials = hpo_trials

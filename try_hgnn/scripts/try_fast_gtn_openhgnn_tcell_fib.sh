@@ -22,6 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/OpenHGNN
-CUDA_LAUNCH_BLOCKING=1 python main.py -m fastGTN -t node_classification -d tcell_fib -g 0 --use_best_config --early_stopping True # will save model if early stopping is true, need to figure out what to do if early stopping is false
+CUDA_LAUNCH_BLOCKING=1 python main.py -m fastGTN -t node_classification -d tcell_fib -g 0 --use_best_config --early_stopping False # will save model if early stopping is true, need to figure out what to do if early stopping is false
 tensorboard --logdir=./openhgnn/output/fastGTN/
 # print out all variables and get their dimensions

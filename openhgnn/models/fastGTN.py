@@ -54,10 +54,10 @@ class fastGTN(BaseModel):
         # add self-loop edge
         return cls(num_edge_type=num_edge_type, num_channels=args.num_channels,
                    in_dim=args.hidden_dim, hidden_dim=args.hidden_dim, num_class=args.out_dim,
-                   num_layers=args.num_layers, category=args.category, norm=args.norm_emd_flag, identity=args.identity)
+                   num_layers=args.num_layers, category=args.category, norm=args.norm_emd_flag, identity=args.identity,dataset=args.dataset) #added dataset
 
     def __init__(self, num_edge_type, num_channels, in_dim, hidden_dim, num_class, num_layers, category, norm,
-                 identity):
+                 identity,dataset):
         super(fastGTN, self).__init__()
         self.num_edge_type = num_edge_type
         self.num_channels = num_channels
@@ -68,6 +68,7 @@ class fastGTN(BaseModel):
         self.is_norm = norm
         self.category = category
         self.identity = identity
+        self.dataset = dataset # added this
 
         layers = []
         for i in range(num_layers):
@@ -139,10 +140,11 @@ class fastGTN(BaseModel):
 
     def save_filters_to_disk(self, filters, layer_idx):
         # Specify the file path to save the filters
-        file_path = "/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters_layer_" + str(layer_idx)
+        file_path = f"/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/{self.__class__.__name__}/{self.dataset}/filters_layer_{layer_idx}" #added dataset
+        #file_path = "/home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/filters_layer_" + str(layer_idx)
         for filter_idx, filter_tensor in enumerate(filters):
             # Save the filters to disk
-            th.save(filter_tensor, file_path + f"_filter_{filter_idx}.pt")  # constructs file name dynamically using f
+            th.save(filter_tensor, file_path + f"_channel_{filter_idx}.pt")  # constructs file name dynamically using f
             print("Filter", filter_idx, "saved to:", file_path)
 
     def print_filters(self, filters, layer_idx):
