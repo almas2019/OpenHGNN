@@ -188,3 +188,5 @@ core.*
 ._heatmap.html
 
 openhgnn/output/
+try_hgnn/img/
+openhgnn/dataset/._imdb4GTN

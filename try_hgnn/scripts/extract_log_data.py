@@ -1,6 +1,8 @@
 import re
 import csv
 import argparse
+import os
+from datetime import datetime
 
 def parse_log(log_file):
     """Parse log file
@@ -27,17 +29,25 @@ def parse_log(log_file):
     with open(log_file, 'r') as file:
         log_data = file.readlines()
 
+       # Define the pattern to extract relevant information for filename
+    filename_pattern = r'(\w{3} \d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2}).*Model: (\w+),\s*Task: (\w+),\s*Dataset: (\w+)'
+
     # Extract information for filename
     match_filename = re.search(filename_pattern, log_data[0])
     if match_filename:
         datetime_str = match_filename.group(1)
+        # Adjusted format to match your log's datetime string
+        datetime_obj = datetime.strptime(datetime_str, '%a %d %b %Y %H:%M:%S')
+        # Format datetime in a file-friendly format, excluding day of week and seconds
+        datetime_str_formatted = datetime_obj.strftime('%Y-%b-%d_%H%M')
         model = match_filename.group(2)
         task = match_filename.group(3)
         dataset = match_filename.group(4)
-        filename_info = f"{datetime_str.replace(' ', '_')}_{model}_{task}_{dataset}.csv"
+        filename_info = f"{datetime_str_formatted}_{model}_{task}_{dataset}.csv"
     else:
         print("Could not extract filename information from log file.")
         exit()
+
 
     # Extract data
     for line in log_data:
@@ -67,6 +77,7 @@ def parse_log(log_file):
 
 
 def write_csv(output_folder, filename_info, epochs, train_losses, valid_losses, train_macro_f1s, train_micro_f1s, valid_macro_f1s, valid_micro_f1s):
+    os.makedirs(output_folder, exist_ok=True)
     if epochs:
         output_file = os.path.join(output_folder, filename_info)
         with open(output_file, 'w', newline='') as csvfile:
