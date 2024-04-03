@@ -42,8 +42,8 @@ if __name__ == "__main__":
     line_loss_alt(data=data, X=args.X, Y=args.Y, output_folder=args.output_folder, output_file=args.output_file)
     line_loss_sns(data=data, X=args.X, Y=args.Y, output_folder=args.output_folder, output_file=args.output_file)
 
-# data= read_data("/project/def-gregorys/almas/OpenHGNN/try_hgnn/data/2024-Mar-28_1049_fastGTN_node_classification_imdb4GTN.csv")
-# line_loss_alt(data=data, X="Epoch", Y="Valid Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="valid_loss_curve")
-# line_loss_alt(data=data, X="Epoch", Y="Train Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="train_loss_curve")
-# line_loss_sns(data=data, X="Epoch", Y="Valid Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="valid_loss_curve")
-# line_loss_sns(data=data, X="Epoch", Y="Train Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="train_loss_curve")
+# data= read_data("/project/def-gregorys/almas/OpenHGNN/try_hgnn/data/2024-Mar-28_1034_fastGTN_node_classification_tcell_fib.csv")
+# line_loss_alt(data=data, X="Epoch", Y="Valid Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_valid_loss_curve")
+# line_loss_alt(data=data, X="Epoch", Y="Train Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_train_loss_curve")
+# line_loss_sns(data=data, X="Epoch", Y="Valid Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_valid_loss_curve")
+# line_loss_sns(data=data, X="Epoch", Y="Train Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_train_loss_curve")
