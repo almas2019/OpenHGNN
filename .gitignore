@@ -186,5 +186,7 @@ core.177117
 core.*
 ._.DS_Store
 ._heatmap.html
-openhgnn/dataset/
+
 openhgnn/output/
+try_hgnn/img/
+openhgnn/dataset/._imdb4GTN
