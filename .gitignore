@@ -190,3 +190,4 @@ core.*
 openhgnn/output/
 try_hgnn/img/
 openhgnn/dataset/._imdb4GTN
+._.gitignore

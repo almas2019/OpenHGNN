@@ -21,5 +21,6 @@ source /project/def-gregorys/almas/spgraph_env/bin/activate
 
 cd /home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/scripts/
 python plot_log_vals.py "/project/def-gregorys/almas/OpenHGNN/try_hgnn/data/2024-Mar-28_1034_fastGTN_node_classification_tcell_fib.csv" "Epoch" "Train Loss" "/project/def-gregorys/almas/OpenHGNN/try_hgnn/img" "train_loss_tcell_fib"
+#python plot_log_vals.py "/home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/data/2024-Apr-10_1408_fastGTN_node_classification_tcell_fib4.csv" "Epoch" "Train Loss" "/project/def-gregorys/almas/OpenHGNN/try_hgnn/img" "train_loss_tcell_fib"
 
 

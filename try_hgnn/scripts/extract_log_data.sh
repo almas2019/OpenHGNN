@@ -21,5 +21,6 @@ source /project/def-gregorys/almas/spgraph_env/bin/activate
 
 cd /home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/scripts/
 python extract_log_data.py /project/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/fastGTN-Mar-28-2024_10-34-03.log /home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/data/ 
+#python extract_log_data.py /home/almas/projects/def-gregorys/almas/OpenHGNN/openhgnn/output/fastGTN/fastGTN-Apr-10-2024_14-08-36.log /home/almas/projects/def-gregorys/almas/OpenHGNN/try_hgnn/data/ 
 
 

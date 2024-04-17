@@ -121,7 +121,13 @@ BEST_CONFIGS = {
             },  
             'tcell_fib3': {
                 'lr': 0.01,'num_layers': 3, 'num_channels': 2, 'adaptive_lr_flag': True,
-            },          
+            },   
+            'tcell_fib4': {
+                'lr': 0.001,'num_layers': 2, 'num_channels': 2, 'adaptive_lr_flag': True,
+            }, 
+            'tcell_fib5': {
+                'lr': 0.001,'num_layers': 1, 'num_channels': 1, 'adaptive_lr_flag': True,
+            },        
             'acm4GTN': {
                 'lr': 0.01, 'hidden_dim': 32, 'num_layers': 3, 'num_channels': 8, 'adaptive_lr_flag': False,
                 'dropout': 0.01,
